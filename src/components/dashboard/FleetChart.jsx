@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import DashboardPanel from './DashboardPanel.jsx'
+import ChartTooltip from './ChartTooltip.jsx'
 import { ChartColumn } from 'lucide-react'
 
 function FleetChart({ fleetActivityLog, totalVehicles }) {
   const title = 'Fleet Performance Overview'
   const color = 'var(--color-burgundy-light)'
+  const [activeIndex, setActiveIndex] = useState(null)
 
   // Labels like 'Oct 6'
   const labels = fleetActivityLog.map(function (day) {
@@ -51,7 +54,15 @@ function FleetChart({ fleetActivityLog, totalVehicles }) {
       subtitle="Daily vehicle utilization, last 10 days (%)"
     >
       <div className="grid min-h-52.5 flex-1 place-items-center">
-        <svg viewBox={'0 0 ' + width + ' ' + height} className="h-auto w-full max-w-110" role="img" aria-label={title}>
+        <svg
+          viewBox={'0 0 ' + width + ' ' + height}
+          className="h-auto w-full max-w-110"
+          role="img"
+          aria-label={title}
+          onMouseLeave={function () {
+            setActiveIndex(null)
+          }}
+        >
           <defs>
             <linearGradient id="fleetAreaGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" style={{ stopColor: color, stopOpacity: 0.25 }} />
@@ -74,19 +85,74 @@ function FleetChart({ fleetActivityLog, totalVehicles }) {
           <polygon points={areaPoints} fill="url(#fleetAreaGradient)" />
           <polyline points={linePoints} fill="none" style={{ stroke: color }} strokeWidth="3" strokeLinejoin="round" />
 
+          {activeIndex !== null && (
+            <line
+              x1={points[activeIndex].x}
+              y1={padTop}
+              x2={points[activeIndex].x}
+              y2={bottomY}
+              strokeWidth="1.5"
+              strokeDasharray="4 4"
+              className="animate-fade-in stroke-burgundy/40"
+            />
+          )}
+
           {points.map(function (p, index) {
+            const isActive = activeIndex === index
+            const step = chartW / (points.length - 1)
             return (
-              <g key={labels[index]}>
-                <circle cx={p.x} cy={p.y} r="4.5" style={{ fill: 'var(--color-surface)', stroke: color }} strokeWidth="2.5" />
-                <text x={p.x} y={p.y - 10} textAnchor="middle" className="fill-gray-500 text-[9px] font-bold">
-                  {p.value}%
-                </text>
-                <text x={p.x} y={height - 10} textAnchor="middle" className="fill-gray-400 text-[9px]">
+              <g
+                key={labels[index]}
+                className="cursor-pointer"
+                onMouseEnter={function () {
+                  setActiveIndex(index)
+                }}
+                onClick={function () {
+                  setActiveIndex(index)
+                }}
+              >
+                <rect x={p.x - step / 2} y={padTop} width={step} height={chartH} fill="transparent" />
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r="11"
+                  style={{ fill: color }}
+                  className={'transition-opacity duration-300 ' + (isActive ? 'opacity-20' : 'opacity-0')}
+                />
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={isActive ? 6.5 : 4.5}
+                  style={{ fill: isActive ? color : 'var(--color-surface)', stroke: isActive ? 'var(--color-surface)' : color }}
+                  strokeWidth="2.5"
+                  className="transition-all duration-300"
+                />
+                {!isActive && (
+                  <text x={p.x} y={p.y - 10} textAnchor="middle" className="fill-gray-500 text-[9px] font-bold">
+                    {p.value}%
+                  </text>
+                )}
+                <text
+                  x={p.x}
+                  y={height - 10}
+                  textAnchor="middle"
+                  className={'text-[9px] transition-colors ' + (isActive ? 'fill-accent font-bold' : 'fill-gray-400')}
+                >
                   {labels[index]}
                 </text>
               </g>
             )
           })}
+
+          {activeIndex !== null && (
+            <ChartTooltip
+              x={points[activeIndex].x}
+              y={points[activeIndex].y}
+              viewWidth={width}
+              title={labels[activeIndex]}
+              text={values[activeIndex] + '% · ' + fleetActivityLog[activeIndex].activeVehicles + '/' + totalVehicles + ' vehicles'}
+            />
+          )}
         </svg>
       </div>
 

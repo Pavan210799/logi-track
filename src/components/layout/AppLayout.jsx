@@ -1,11 +1,14 @@
 import { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar.jsx'
 import Header from './Header.jsx'
 import { scrollToTop } from '../../utils/scroll.js'
+import { useSession } from '../../hooks/useSession.js'
 
-function AppLayout({ children }) {
+// App frame for signed-in users; everyone else goes to the login page first
+function AppLayout() {
   const location = useLocation()
+  const session = useSession()
 
   // Every page opens from the top
   useEffect(
@@ -14,6 +17,11 @@ function AppLayout({ children }) {
     },
     [location.pathname],
   )
+
+  if (!session) {
+    const from = location.pathname === '/' ? undefined : location.pathname + location.search
+    return <Navigate to="/login" replace state={from ? { from: from } : undefined} />
+  }
 
   return (
     <div className="flex h-dvh overflow-hidden">
@@ -27,7 +35,7 @@ function AppLayout({ children }) {
         >
           {/* A new key on each page replays the fade-in */}
           <div key={location.pathname} className="animate-fade-up">
-            {children}
+            <Outlet />
           </div>
         </main>
       </div>

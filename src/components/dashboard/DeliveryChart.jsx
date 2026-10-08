@@ -1,9 +1,16 @@
+import { useState } from 'react'
 import DashboardPanel from './DashboardPanel.jsx'
+import ChartTooltip from './ChartTooltip.jsx'
 import { CircleCheck } from 'lucide-react'
+
+function fullDate(date) {
+  return new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+}
 
 function DeliveryChart({ fleetActivityLog }) {
   const title = 'Delivery Performance'
   const lastSevenDays = fleetActivityLog.slice(-7)
+  const [activeIndex, setActiveIndex] = useState(null)
 
   // Labels like 'Mon'
   const labels = lastSevenDays.map(function (day) {
@@ -34,7 +41,15 @@ function DeliveryChart({ fleetActivityLog }) {
       subtitle="On-time delivery rate, last 7 days (%)"
     >
       <div className="grid min-h-52.5 flex-1 place-items-center">
-        <svg viewBox={'0 0 ' + width + ' ' + height} className="h-auto w-full max-w-110" role="img" aria-label={title}>
+        <svg
+          viewBox={'0 0 ' + width + ' ' + height}
+          className="h-auto w-full max-w-110"
+          role="img"
+          aria-label={title}
+          onMouseLeave={function () {
+            setActiveIndex(null)
+          }}
+        >
           <defs>
             <linearGradient id="deliveryBarGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" style={{ stopColor: 'var(--color-burgundy-light)' }} />
@@ -58,18 +73,71 @@ function DeliveryChart({ fleetActivityLog }) {
             const barH = (value / max) * chartH
             const x = padLeft + index * (barWidth + barGap)
             const y = padTop + chartH - barH
+            const isActive = activeIndex === index
+            const isDimmed = activeIndex !== null && !isActive
             return (
-              <g key={labels[index]}>
-                <rect x={x} y={y} width={barWidth} height={barH} rx="6" fill="url(#deliveryBarGradient)" />
-                <text x={x + barWidth / 2} y={height - 10} textAnchor="middle" className="fill-gray-400 text-[9px]">
+              <g
+                key={labels[index]}
+                className="cursor-pointer"
+                onMouseEnter={function () {
+                  setActiveIndex(index)
+                }}
+                onClick={function () {
+                  setActiveIndex(index)
+                }}
+              >
+                <rect
+                  x={x - barGap / 2}
+                  y={padTop}
+                  width={barWidth + barGap}
+                  height={chartH}
+                  rx="8"
+                  className={'transition-opacity duration-200 fill-burgundy/5 ' + (isActive ? 'opacity-100' : 'opacity-0')}
+                />
+                <rect
+                  x={x}
+                  y={y}
+                  width={barWidth}
+                  height={barH}
+                  rx="6"
+                  fill="url(#deliveryBarGradient)"
+                  className={
+                    'transition-[opacity,filter] duration-300 ' +
+                    (isDimmed ? 'opacity-40 ' : 'opacity-100 ') +
+                    (isActive ? 'drop-shadow-[0_6px_10px_rgba(107,18,32,0.35)] brightness-110' : '')
+                  }
+                />
+                <text
+                  x={x + barWidth / 2}
+                  y={height - 10}
+                  textAnchor="middle"
+                  className={'text-[9px] transition-colors ' + (isActive ? 'fill-accent font-bold' : 'fill-gray-400')}
+                >
                   {labels[index]}
                 </text>
-                <text x={x + barWidth / 2} y={y - 6} textAnchor="middle" className="fill-gray-500 text-[9px] font-bold">
-                  {value}%
-                </text>
+                {!isActive && (
+                  <text
+                    x={x + barWidth / 2}
+                    y={y - 6}
+                    textAnchor="middle"
+                    className={'fill-gray-500 text-[9px] font-bold transition-opacity duration-300 ' + (isDimmed ? 'opacity-40' : '')}
+                  >
+                    {value}%
+                  </text>
+                )}
               </g>
             )
           })}
+
+          {activeIndex !== null && (
+            <ChartTooltip
+              x={padLeft + activeIndex * (barWidth + barGap) + barWidth / 2}
+              y={padTop + chartH - (values[activeIndex] / max) * chartH}
+              viewWidth={width}
+              title={fullDate(lastSevenDays[activeIndex].date)}
+              text={values[activeIndex] + '% · ' + lastSevenDays[activeIndex].onTime + '/' + lastSevenDays[activeIndex].deliveries + ' on time'}
+            />
+          )}
         </svg>
       </div>
     </DashboardPanel>

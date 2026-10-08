@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Bell, CircleAlert, Clock, IdCard, Wrench } from 'lucide-react'
+import { ArrowRight, Bell, ChevronRight, CircleAlert, Clock, IdCard, Wrench } from 'lucide-react'
 import { formatDateTime } from '../../utils/format.js'
 
 // Icon and colors for each type of alert
@@ -79,27 +79,33 @@ function AlertList({ notifications }) {
           const severityLabel = item.severity === 'danger' ? 'Urgent' : 'Warning'
 
           return (
-            <li
-              key={item.id}
-              className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-surface/80 bg-surface/90 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <span className={'absolute inset-y-2 left-0 w-1 rounded-r-full ' + style.stripe}></span>
-              <div className={'ml-1 grid h-10 w-10 shrink-0 place-items-center rounded-xl ' + style.iconBox}>
-                <Icon size={20} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <strong className={'text-[0.88rem] font-bold ' + style.titleStyle}>{item.title}</strong>
-                  <span className={'rounded-md px-1.5 py-0.5 text-[0.65rem] font-bold uppercase ' + style.chip}>
-                    {severityLabel}
+            <li key={item.id}>
+              <Link
+                to="/notifications"
+                className="shine group relative flex items-center gap-3 overflow-hidden rounded-xl border border-surface/80 bg-surface/90 p-3 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-burgundy/20 hover:bg-surface hover:shadow-md"
+              >
+                <span className={'absolute inset-y-2 left-0 w-1 rounded-r-full transition-all duration-300 group-hover:inset-y-0 group-hover:w-1.5 ' + style.stripe}></span>
+                <div className={'ml-1 grid h-10 w-10 shrink-0 place-items-center rounded-xl transition duration-300 group-hover:scale-110 group-hover:-rotate-6 ' + style.iconBox}>
+                  <Icon size={20} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex flex-wrap items-center gap-2">
+                    <strong className={'text-[0.88rem] font-bold ' + style.titleStyle}>{item.title}</strong>
+                    <span className={'rounded-md px-1.5 py-0.5 text-[0.65rem] font-bold uppercase ' + style.chip}>
+                      {severityLabel}
+                    </span>
+                  </div>
+                  <p className="mb-2 text-[0.82rem] leading-snug text-gray-600">{item.message}</p>
+                  <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-gray-400">
+                    <Clock size={12} className="opacity-70" />
+                    {formatDateTime(item.createdAt)}
                   </span>
                 </div>
-                <p className="mb-2 text-[0.82rem] leading-snug text-gray-600">{item.message}</p>
-                <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-gray-400">
-                  <Clock size={12} className="opacity-70" />
-                  {formatDateTime(item.createdAt)}
-                </span>
-              </div>
+                <ChevronRight
+                  size={18}
+                  className="shrink-0 -translate-x-2 text-gray-300 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:text-accent group-hover:opacity-100"
+                />
+              </Link>
             </li>
           )
         })}

@@ -71,24 +71,24 @@ function ActivityList({ activities }) {
             const Icon = type.icon
 
             return (
-              <li key={item.id} className="flex items-center gap-3">
+              <li key={item.id} className="group flex items-center gap-3">
                 <div
                   className={
-                    'grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface text-gray-700 shadow-sm ring-4 ' +
+                    'grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface text-gray-700 shadow-sm ring-4 transition duration-300 group-hover:scale-115 group-hover:-rotate-12 group-hover:text-accent group-hover:shadow-md ' +
                     type.ring
                   }
                 >
                   <Icon size={15} />
                 </div>
 
-                <div className="min-w-0 flex-1 rounded-xl border border-line/80 bg-linear-to-br from-sand to-surface px-3 py-2.5">
+                <div className="min-w-0 flex-1 rounded-xl border border-line/80 bg-linear-to-br from-sand to-surface px-3 py-2.5 transition duration-300 group-hover:translate-x-1 group-hover:border-burgundy/20 group-hover:shadow-md">
                   <div className="mb-1 flex items-center justify-between gap-2">
-                    <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide text-gray-600">
+                    <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide text-gray-600 transition-colors duration-300 group-hover:bg-burgundy/10 group-hover:text-accent">
                       {type.label}
                     </span>
                     <span className="shrink-0 text-[0.68rem] text-gray-400">{formatDateTime(item.createdAt)}</span>
                   </div>
-                  <p className="text-[0.8rem] leading-snug font-medium text-gray-700">{item.message}</p>
+                  <p className="text-[0.8rem] leading-snug font-medium text-gray-700 transition-colors duration-300 group-hover:text-gray-900">{item.message}</p>
                 </div>
               </li>
             )
